@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitPlus</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="sidebar-overlay"></div>
+    <button id="hamburger-btn" class="hamburger-btn">
+        <i class="fas fa-bars"></i>
+    </button>
+    <nav class="sidebar">
+        <div class="logo">
+            <h1>FitPlus</h1>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#dashboard" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="#water"><i class="fas fa-tint"></i> Water Intake</a></li>
+            <li><a href="#meals"><i class="fas fa-utensils"></i> Meals</a></li>
+            <li><a href="#sleep"><i class="fas fa-moon"></i> Sleep</a></li>
+            <li><a href="#medication"><i class="fas fa-pills"></i> Medication</a></li>
+            <li><a href="#streaks"><i class="fas fa-fire"></i> Streaks</a></li>
+            <li><a href="#firstaid"><i class="fas fa-kit-medical"></i> First Aid</a></li>
+            <li><a href="#symptoms"><i class="fas fa-stethoscope"></i> Symptoms</a></li>
+            <li><a href="#emergency"><i class="fas fa-ambulance"></i> Emergency</a></li>
+            <li><a href="#menstrual"><i class="fas fa-calendar"></i> Menstrual Tracker</a></li>
+            <li><a href="#todo"><i class="fas fa-tasks"></i> Todo List</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <div id="notification-area"></div>
+        
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="section active">
+            <h2>Dashboard</h2>
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h3>Water Intake</h3>
+                    <div class="water-progress">
+                        <canvas id="waterChart"></canvas>
+                        <p><span id="dashboardWaterCount">0</span> / 8 glasses</p>
+                        <div class="water-buttons">
+                            <button onclick="addWater()"><i class="fas fa-plus"></i> Add Glass</button>
+                            <button onclick="subtractWater()" class="subtract-btn"><i class="fas fa-minus"></i> Remove Glass</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Today's Meals</h3>
+                    <div id="mealsList">
+                        <div class="dashboard-meals">
+                            <div class="meal-slot">
+                                <h4><i class="fas fa-sun"></i> Breakfast</h4>
+                                <div id="dashboardBreakfast" class="meal-content">
+                                    <p class="empty-meal">No breakfast logged yet</p>
+                                </div>
+                            </div>
+                            <div class="meal-slot">
+                                <h4><i class="fas fa-cloud-sun"></i> Lunch</h4>
+                                <div id="dashboardLunch" class="meal-content">
+                                    <p class="empty-meal">No lunch logged yet</p>
+                                </div>
+                            </div>
+                            <div class="meal-slot">
+                                <h4><i class="fas fa-moon"></i> Dinner</h4>
+                                <div id="dashboardDinner" class="meal-content">
+                                    <p class="empty-meal">No dinner logged yet</p>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="addMeal()" class="add-meal-btn">
+                            <i class="fas fa-plus"></i> Log Meal
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Sleep Tracking</h3>
+                    <div class="sleep-input">
+                        <input type="time" id="sleepTime" placeholder="Sleep Time">
+                        <input type="time" id="wakeTime" placeholder="Wake Time">
+                        <button onclick="logSleep()">Log Sleep</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Current Streak</h3>
+                    <div class="streak-display">
+                        <span id="streakCount">0</span> days
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-tasks"></i> Quick Tasks</h3>
+                    <div class="todo-container">
+                        <div class="todo-input">
+                            <input type="text" id="dashboardTodoInput" placeholder="Add a new task...">
+                            <button onclick="addTodo('dashboard')" class="add-todo-btn">
+                                <i class="fas fa-plus"></i> Add
+                            </button>
+                        </div>
+                        <ul id="dashboardTodoList" class="todo-list"></ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Water Intake Section -->
+        <section id="water" class="section">
+            <h2>Water Intake Tracking</h2>
+            <div class="card">
+                <div class="water-settings">
+                    <h3><i class="fas fa-gear"></i> Daily Goal Settings</h3>
+                    <div class="goal-setting">
+                        <label for="waterGoal">Daily water goal (glasses):</label>
+                        <div class="goal-input">
+                            <input type="number" id="waterGoal" min="1" max="20" value="8">
+                            <button onclick="updateWaterGoal()" class="save-goal">Save Goal</button>
+                        </div>
+                        <p class="goal-info">Recommended: 8-10 glasses (2-2.5 liters) per day</p>
+                    </div>
+                </div>
+                <div class="water-progress">
+                    <div class="progress-container">
+                        <canvas id="waterDetailChart"></canvas>
+                        <div class="progress-text">
+                            <span id="detailWaterCount">0</span>
+                            <span class="separator">/</span>
+                            <span id="waterGoalDisplay">8</span>
+                            <span class="unit">glasses</span>
+                        </div>
+                    </div>
+                    <div class="water-buttons">
+                        <button onclick="addWater()" class="add-btn">
+                            <i class="fas fa-plus"></i> Add Glass
+                        </button>
+                        <button onclick="subtractWater()" class="subtract-btn">
+                            <i class="fas fa-minus"></i> Remove Glass
+                        </button>
+                    </div>
+                </div>
+                <div class="water-history">
+                    <h3><i class="fas fa-clock-rotate-left"></i> Today's Water Intake</h3>
+                    <ul id="waterHistory" class="history-list"></ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Meals Section -->
+        <section id="meals" class="section">
+            <h2>Meal Tracking</h2>
+            <div class="meals-grid">
+                <div class="card">
+                    <h3><i class="fas fa-utensils"></i> Log Your Meals</h3>
+                    <div class="meal-form">
+                        <div class="form-group">
+                            <label for="mealType">Meal Type</label>
+                            <select id="mealType" required>
+                                <option value="breakfast">
+                                    <i class="fas fa-sun"></i> Breakfast
+                                </option>
+                                <option value="lunch">
+                                    <i class="fas fa-cloud-sun"></i> Lunch
+                                </option>
+                                <option value="dinner">
+                                    <i class="fas fa-moon"></i> Dinner
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="meal-input-container">
+                            <div class="form-group">
+                                <label for="mealItems">What did you eat?</label>
+                                <textarea id="mealItems" rows="3" placeholder="List the items you ate..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="mealTime">Time</label>
+                                <input type="time" id="mealTime" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="mealNotes">Notes (Optional)</label>
+                                <textarea id="mealNotes" rows="2" placeholder="Add any notes about your meal..."></textarea>
+                            </div>
+                            <div class="meal-rating">
+                                <label>How healthy was this meal?</label>
+                                <div class="rating-buttons">
+                                    <button type="button" onclick="setMealRating('healthy')" class="rating-btn">
+                                        <i class="fas fa-apple-alt"></i> Healthy
+                                    </button>
+                                    <button type="button" onclick="setMealRating('moderate')" class="rating-btn">
+                                        <i class="fas fa-cookie-bite"></i> Moderate
+                                    </button>
+                                    <button type="button" onclick="setMealRating('unhealthy')" class="rating-btn">
+                                        <i class="fas fa-burger"></i> Unhealthy
+                                    </button>
+                                </div>
+                            </div>
+                            <button onclick="logMeal()" class="submit-meal">Log Meal</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-calendar-day"></i> Today's Meals</h3>
+                    <div class="todays-meals">
+                        <div class="meal-slot">
+                            <h4><i class="fas fa-sun"></i> Breakfast</h4>
+                            <div id="todayBreakfast" class="meal-content">
+                                <p class="empty-meal">No breakfast logged yet</p>
+                            </div>
+                        </div>
+                        <div class="meal-slot">
+                            <h4><i class="fas fa-cloud-sun"></i> Lunch</h4>
+                            <div id="todayLunch" class="meal-content">
+                                <p class="empty-meal">No lunch logged yet</p>
+                            </div>
+                        </div>
+                        <div class="meal-slot">
+                            <h4><i class="fas fa-moon"></i> Dinner</h4>
+                            <div id="todayDinner" class="meal-content">
+                                <p class="empty-meal">No dinner logged yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-history"></i> Meal History</h3>
+                    <div class="meal-stats">
+                        <div class="stat-box">
+                            <span class="stat-label">Weekly Healthy Meals</span>
+                            <span class="stat-value" id="healthyMealsCount">0</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">Meals Tracked</span>
+                            <span class="stat-value" id="totalMealsCount">0</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">Tracking Streak</span>
+                            <span class="stat-value" id="mealStreakCount">0</span>
+                        </div>
+                    </div>
+                    <div class="meal-history" id="mealHistory">
+                        <!-- Meal history will be added here dynamically -->
+                    </div>
+                </div>
+
+                <div class="card meal-tips">
+                    <h3><i class="fas fa-lightbulb"></i> Healthy Eating Tips</h3>
+                    <div class="tips-container">
+                        <div class="tip-category">
+                            <h4><i class="fas fa-clock"></i> Meal Timing</h4>
+                            <ul>
+                                <li>Eat breakfast within 1 hour of waking</li>
+                                <li>Space meals 3-4 hours apart</li>
+                                <li>Avoid eating 2-3 hours before bed</li>
+                                <li>Stay consistent with meal times</li>
+                            </ul>
+                        </div>
+                        <div class="tip-category">
+                            <h4><i class="fas fa-plate-wheat"></i> Portion Control</h4>
+                            <ul>
+                                <li>Fill half your plate with vegetables</li>
+                                <li>Quarter for lean proteins</li>
+                                <li>Quarter for whole grains</li>
+                                <li>Use smaller plates</li>
+                            </ul>
+                        </div>
+                        <div class="tip-category">
+                            <h4><i class="fas fa-carrot"></i> Food Choices</h4>
+                            <ul>
+                                <li>Choose whole grains over refined</li>
+                                <li>Include protein in every meal</li>
+                                <li>Eat a variety of colorful vegetables</li>
+                                <li>Choose healthy fats (nuts, avocado, olive oil)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sleep Section -->
+        <section id="sleep" class="section">
+            <h2>Sleep Tracking</h2>
+            <div class="sleep-grid">
+                <div class="card">
+                    <h3><i class="fas fa-moon"></i> Log Your Sleep</h3>
+                    <div class="sleep-input">
+                        <div class="form-group">
+                            <label for="sleepTimeDetail">Sleep Time</label>
+                            <input type="time" id="sleepTimeDetail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="wakeTimeDetail">Wake Time</label>
+                            <input type="time" id="wakeTimeDetail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="sleepQuality">Sleep Quality</label>
+                            <select id="sleepQuality">
+                                <option value="excellent">Excellent</option>
+                                <option value="good">Good</option>
+                                <option value="fair">Fair</option>
+                                <option value="poor">Poor</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="sleepNotes">Notes (Optional)</label>
+                            <textarea id="sleepNotes" rows="3" placeholder="How did you sleep? Any disturbances?"></textarea>
+                        </div>
+                        <button onclick="logSleep()" class="submit-sleep">Log Sleep</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-chart-line"></i> Sleep History</h3>
+                    <div class="sleep-stats">
+                        <div class="stat-box">
+                            <span class="stat-label">Average Sleep Duration</span>
+                            <span class="stat-value" id="avgSleepDuration">--:--</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">Average Bedtime</span>
+                            <span class="stat-value" id="avgBedtime">--:--</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">Average Wake Time</span>
+                            <span class="stat-value" id="avgWakeTime">--:--</span>
+                        </div>
+                    </div>
+                    <div class="sleep-history" id="sleepHistory">
+                        <!-- Sleep history will be added here dynamically -->
+                        <div class="history-actions">
+                            <button onclick="clearAllSleepLogs()" class="clear-all-btn">
+                                <i class="fas fa-trash"></i> Clear All Logs
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card sleep-tips">
+                    <h3><i class="fas fa-lightbulb"></i> Having Trouble Sleeping?</h3>
+                    <div class="tips-container">
+                        <div class="tip-category">
+                            <h4><i class="fas fa-clock"></i> Establish a Sleep Schedule</h4>
+                            <ul>
+                                <li>Go to bed and wake up at the same time every day</li>
+                                <li>Avoid sleeping in on weekends</li>
+                                <li>Create a consistent bedtime routine</li>
+                                <li>Aim for 7-9 hours of sleep per night</li>
+                            </ul>
+                        </div>
+
+                        <div class="tip-category">
+                            <h4><i class="fas fa-bed"></i> Optimize Your Sleep Environment</h4>
+                            <ul>
+                                <li>Keep your bedroom cool (around 65°F/18°C)</li>
+                                <li>Ensure your room is dark and quiet</li>
+                                <li>Invest in a comfortable mattress and pillows</li>
+                                <li>Use breathable bedding materials</li>
+                            </ul>
+                        </div>
+
+                        <div class="tip-category">
+                            <h4><i class="fas fa-ban"></i> Things to Avoid</h4>
+                            <ul>
+                                <li>Limit screen time 1-2 hours before bed</li>
+                                <li>Avoid caffeine after 2 PM</li>
+                                <li>Don't eat large meals close to bedtime</li>
+                                <li>Reduce alcohol and nicotine intake</li>
+                            </ul>
+                        </div>
+
+                        <div class="tip-category">
+                            <h4><i class="fas fa-running"></i> Daytime Habits</h4>
+                            <ul>
+                                <li>Exercise regularly (but not too close to bedtime)</li>
+                                <li>Get natural sunlight during the day</li>
+                                <li>Limit daytime naps to 20-30 minutes</li>
+                                <li>Stay active and engaged during the day</li>
+                            </ul>
+                        </div>
+
+                        <div class="tip-category">
+                            <h4><i class="fas fa-spa"></i> Relaxation Techniques</h4>
+                            <ul>
+                                <li>Practice deep breathing exercises</li>
+                                <li>Try progressive muscle relaxation</li>
+                                <li>Use meditation or mindfulness apps</li>
+                                <li>Listen to calming sounds or white noise</li>
+                            </ul>
+                        </div>
+
+                        <div class="wellness-note">
+                            <p><i class="fas fa-info-circle"></i> If sleep problems persist, consider consulting a healthcare provider or sleep specialist.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Medication Section -->
+        <section id="medication" class="section">
+            <h2>Medication Tracking</h2>
+            <div class="medication-grid">
+                <div class="card">
+                    <h3><i class="fas fa-plus-circle"></i> Add New Medication</h3>
+                    <form id="medicationForm" class="medication-form">
+                        <div class="form-group">
+                            <label for="medName">Medication Name</label>
+                            <input type="text" id="medName" required placeholder="Enter medication name">
+                        </div>
+                        <div class="form-group">
+                            <label for="medDosage">Dosage</label>
+                            <div class="dosage-input">
+                                <input type="number" id="medDosage" required min="0.1" step="0.1" placeholder="Amount">
+                                <select id="medUnit">
+                                    <option value="mg">mg</option>
+                                    <option value="ml">ml</option>
+                                    <option value="tablet">tablet(s)</option>
+                                    <option value="capsule">capsule(s)</option>
+                                    <option value="drop">drop(s)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="medFrequency">Frequency</label>
+                            <select id="medFrequency">
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="custom">Custom Schedule</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="dailyTimesGroup">
+                            <label>Times per Day</label>
+                            <div class="times-container" id="timesContainer">
+                                <div class="time-input">
+                                    <input type="time" class="medTime" required>
+                                    <button type="button" class="remove-time" onclick="removeTimeInput(this)">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="button" class="add-time-btn" onclick="addTimeInput()">
+                                <i class="fas fa-plus"></i> Add Another Time
+                            </button>
+                        </div>
+                        <div class="form-group hidden" id="weeklyDaysGroup">
+                            <label>Days of Week</label>
+                            <div class="days-container">
+                                <label class="day-checkbox">
+                                    <input type="checkbox" value="sun"> Sun
+                                </label>
+                                <label class="day-checkbox">
+                                    <input type="checkbox" value="mon"> Mon
+                                </label>
+                                <label class="day-checkbox">
+                                    <input type="checkbox" value="tue"> Tue
+                                </label>
+                                <label class="day-checkbox">
+                                    <input type="checkbox" value="wed"> Wed
+                                </label>
+                                <label class="day-checkbox">
+                                    <input type="checkbox" value="thu"> Thu
+                                </label>
+                                <label class="day-checkbox">
+                                    <input type="checkbox" value="fri"> Fri
+                                </label>
+                                <label class="day-checkbox">
+                                    <input type="checkbox" value="sat"> Sat
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="medStartDate">Start Date</label>
+                            <input type="date" id="medStartDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="medEndDate">End Date (Optional)</label>
+                            <input type="date" id="medEndDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="medNotes">Notes (Optional)</label>
+                            <textarea id="medNotes" rows="3" placeholder="Add any special instructions or notes"></textarea>
+                        </div>
+                        <div class="form-group notification-options">
+                            <label>Notification Preferences</label>
+                            <div class="notification-checkboxes">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="notifyBrowser" checked>
+                                    Browser Notifications
+                                </label>
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="notifySound" checked>
+                                    Sound Alert
+                                </label>
+                            </div>
+                        </div>
+                        <button type="submit" class="submit-med">Add Medication</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-list-check"></i> Active Medications</h3>
+                    <div class="medications-list" id="activeMedications">
+                        <!-- Medications will be added here dynamically -->
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-clock-rotate-left"></i> Today's Schedule</h3>
+                    <div class="schedule-timeline" id="medicationSchedule">
+                        <!-- Schedule will be added here dynamically -->
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-chart-line"></i> Medication History</h3>
+                    <div class="medication-history" id="medicationHistory">
+                        <!-- History will be added here dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Streaks Section -->
+        <section id="streaks" class="section">
+            <h2>Your Health Streaks</h2>
+            <div class="streaks-grid">
+                <div class="card">
+                    <h3>Current Streak</h3>
+                    <div class="streak-display">
+                        <span id="streakCountDetail">0</span> days
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Achievements</h3>
+                    <ul id="achievements"></ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- First Aid Section -->
+        <section id="firstaid" class="section">
+            <h2>First Aid Guide</h2>
+            <div class="firstaid-grid">
+                <div class="card">
+                    <div class="firstaid-search">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Search first aid instructions..." oninput="searchFirstAid(this.value)">
+                        </div>
+                    </div>
+                    <h3>Common Injuries</h3>
+                    <ul class="firstaid-list">
+                        <li><button onclick="showFirstAidTips('cuts')"><i class="fas fa-band-aid"></i> Cuts and Scrapes</button></li>
+                        <li><button onclick="showFirstAidTips('burns')"><i class="fas fa-fire"></i> Burns</button></li>
+                        <li><button onclick="showFirstAidTips('sprains')"><i class="fas fa-bone"></i> Sprains</button></li>
+                        <li><button onclick="showFirstAidTips('choking')"><i class="fas fa-head-side-cough"></i> Choking</button></li>
+                        <li><button onclick="showFirstAidTips('nosebleed')"><i class="fas fa-droplet"></i> Nosebleed</button></li>
+                        <li><button onclick="showFirstAidTips('bee_sting')"><i class="fas fa-bug"></i> Bee Sting</button></li>
+                        <li><button onclick="showFirstAidTips('heat_exhaustion')"><i class="fas fa-temperature-high"></i> Heat Exhaustion</button></li>
+                        <li><button onclick="showFirstAidTips('fracture')"><i class="fas fa-crutch"></i> Fracture</button></li>
+                        <li><button onclick="showFirstAidTips('poisoning')"><i class="fas fa-skull-crossbones"></i> Poisoning</button></li>
+                    </ul>
+                </div>
+                <div class="card" id="firstaidContent">
+                    <h3>First Aid Instructions</h3>
+                    <div id="firstAidInfo"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Symptoms Section -->
+        <section id="symptoms" class="section">
+            <h2>Symptom Checker</h2>
+            <div class="symptoms-grid">
+                <div class="card">
+                    <div class="symptoms-search">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Search your symptoms..." oninput="searchSymptoms(this.value)">
+                        </div>
+                    </div>
+                    <h3><i class="fas fa-stethoscope"></i> Common Symptoms</h3>
+                    <div class="symptoms-categories">
+                        <div class="symptom-category">
+                            <h4><i class="fas fa-head-side-cough"></i> General</h4>
+                            <ul class="symptoms-list">
+                                <li>
+                                    <button onclick="checkSymptoms('headache')" class="symptom-button">
+                                        <i class="fas fa-head-side-virus"></i>
+                                        <div class="symptom-text">Headache</div>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button onclick="checkSymptoms('fever')" class="symptom-button">
+                                        <i class="fas fa-thermometer-half"></i>
+                                        <div class="symptom-text">Fever</div>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button onclick="checkSymptoms('fatigue')" class="symptom-button">
+                                        <i class="fas fa-bed"></i>
+                                        <div class="symptom-text">Fatigue</div>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button onclick="checkSymptoms('dizziness')" class="symptom-button">
+                                        <i class="fas fa-dizzy"></i>
+                                        <div class="symptom-text">Dizziness</div>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="symptom-category">
+                            <h4><i class="fas fa-lungs"></i> Respiratory</h4>
+                            <ul class="symptoms-list">
+                                <li>
+                                    <button onclick="checkSymptoms('cough')" class="symptom-button">
+                                        <i class="fas fa-head-side-cough"></i>
+                                        <div class="symptom-text">Cough</div>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button onclick="checkSymptoms('sore_throat')" class="symptom-button">
+                                        <i class="fas fa-head-side-mask"></i>
+                                        <div class="symptom-text">Sore Throat</div>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button onclick="checkSymptoms('runny_nose')" class="symptom-button">
+                                        <i class="fas fa-head-side-cough"></i>
+                                        <div class="symptom-text">Runny Nose</div>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button onclick="checkSymptoms('shortness_of_breath')" class="symptom-button">
+                                        <i class="fas fa-lungs-virus"></i>
+                                        <div class="symptom-text">Shortness of Breath</div>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="symptom-category">
+                            <h4><i class="fas fa-stomach"></i> Digestive</h4>
+                            <ul class="symptoms-list">
+                                <li>
+                                    <button onclick="checkSymptoms('nausea')" class="symptom-button">
+                                        <i class="fas fa-face-dizzy"></i>
+                                        <div class="symptom-text">Nausea</div>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button onclick="checkSymptoms('stomach_pain')" class="symptom-button">
+                                        <i class="fas fa-person-dots-from-line"></i>
+                                        <div class="symptom-text">Stomach Pain</div>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button onclick="checkSymptoms('diarrhea')" class="symptom-button">
+                                        <i class="fas fa-toilet"></i>
+                                        <div class="symptom-text">Diarrhea</div>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button onclick="checkSymptoms('loss_of_appetite')" class="symptom-button">
+                                        <i class="fas fa-utensils"></i>
+                                        <div class="symptom-text">Loss of Appetite</div>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="symptom-category">
+                            <h4><i class="fas fa-bone"></i> Musculoskeletal</h4>
+                            <ul class="symptoms-list">
+                                <li>
+                                    <button onclick="checkSymptoms('muscle_pain')" class="symptom-button">
+                                        <i class="fas fa-child"></i>
+                                        <div class="symptom-text">Muscle Pain</div>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button onclick="checkSymptoms('joint_pain')" class="symptom-button">
+                                        <i class="fas fa-bone"></i>
+                                        <div class="symptom-text">Joint Pain</div>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button onclick="checkSymptoms('back_pain')" class="symptom-button">
+                                        <i class="fas fa-user-injured"></i>
+                                        <div class="symptom-text">Back Pain</div>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button onclick="checkSymptoms('neck_pain')" class="symptom-button">
+                                        <i class="fas fa-user"></i>
+                                        <div class="symptom-text">Neck Pain</div>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" id="symptomContent">
+                    <h3><i class="fas fa-info-circle"></i> Symptom Information</h3>
+                    <div id="symptomInfo" class="symptom-details"></div>
+                    <div class="severity-indicator">
+                        <div class="severity-mild hidden">
+                            <i class="fas fa-circle"></i> Mild - Monitor and manage at home
+                        </div>
+                        <div class="severity-moderate hidden">
+                            <i class="fas fa-circle"></i> Moderate - Consult healthcare provider
+                        </div>
+                        <div class="severity-severe hidden">
+                            <i class="fas fa-circle"></i> Severe - Seek immediate medical attention
+                        </div>
+                    </div>
+                    <p class="disclaimer">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        This is not a medical diagnosis. Please consult a healthcare professional for proper medical advice.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Emergency Section -->
+        <section id="emergency" class="section">
+            <h2>Emergency Contacts</h2>
+            <div class="emergency-grid">
+                <div class="card">
+                    <div class="country-selector">
+                        <h3>Select Country</h3>
+                        <div class="custom-select">
+                            <select id="countrySelect" onchange="updateEmergencyNumbers()">
+                                <option value="india" selected>India</option>
+                                <option value="usa">United States</option>
+                                <option value="uk">United Kingdom</option>
+                                <option value="australia">Australia</option>
+                                <option value="canada">Canada</option>
+                                <option value="japan">Japan</option>
+                                <option value="singapore">Singapore</option>
+                                <option value="uae">UAE</option>
+                            </select>
+                            <div class="select-arrow"></div>
+                        </div>
+                    </div>
+                    <div class="emergency-numbers">
+                        <h3>Emergency Numbers</h3>
+                        <div class="emergency-categories">
+                            <div class="emergency-category">
+                                <h4><i class="fas fa-ambulance"></i> Medical Emergency</h4>
+                                <ul id="medicalEmergency" class="emergency-list"></ul>
+                            </div>
+                            <div class="emergency-category">
+                                <h4><i class="fas fa-fire-extinguisher"></i> Police & Fire</h4>
+                                <ul id="policeAndFire" class="emergency-list"></ul>
+                            </div>
+                            <div class="emergency-category">
+                                <h4><i class="fas fa-phone"></i> Helplines</h4>
+                                <ul id="helplines" class="emergency-list"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3><i class="fas fa-hospital"></i> Nearby Services</h3>
+                    <div class="nearby-services">
+                        <button onclick="getNearbyEmergencyServices()">
+                            <i class="fas fa-search-location"></i> Find Nearby Emergency Services
+                        </button>
+                        <div id="nearbyServices" class="services-list"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Menstrual Tracker Section -->
+        <section id="menstrual" class="section">
+            <h2>Menstrual Cycle Tracker</h2>
+            <div class="menstrual-grid">
+                <div class="card">
+                    <h3>Track Your Period</h3>
+                    <div class="period-input">
+                        <div class="date-input">
+                            <label for="periodStartDate">Start Date:</label>
+                            <input type="date" id="periodStartDate">
+                            <label for="periodEndDate">End Date:</label>
+                            <input type="date" id="periodEndDate">
+                        </div>
+                        <div class="symptoms-input">
+                            <h4>Symptoms:</h4>
+                            <div class="symptom-checkboxes">
+                                <label><input type="checkbox" value="cramps"> Cramps</label>
+                                <label><input type="checkbox" value="headache"> Headache</label>
+                                <label><input type="checkbox" value="mood"> Mood Changes</label>
+                                <label><input type="checkbox" value="fatigue"> Fatigue</label>
+                                <label><input type="checkbox" value="bloating"> Bloating</label>
+                                <label><input type="checkbox" value="backache"> Back Pain</label>
+                                <label><input type="checkbox" value="breast_tenderness"> Breast Tenderness</label>
+                                <label><input type="checkbox" value="acne"> Acne</label>
+                                <label><input type="checkbox" value="nausea"> Nausea</label>
+                                <label><input type="checkbox" value="insomnia"> Sleep Issues</label>
+                                <label><input type="checkbox" value="appetite"> Appetite Changes</label>
+                                <label><input type="checkbox" value="dizziness"> Dizziness</label>
+                                <label><input type="checkbox" value="anxiety"> Anxiety</label>
+                                <label><input type="checkbox" value="cravings"> Food Cravings</label>
+                                <label><input type="checkbox" value="joint_pain"> Joint Pain</label>
+                            </div>
+                        </div>
+                        <div class="flow-input">
+                            <h4>Flow Intensity:</h4>
+                            <div class="custom-select">
+                                <select id="flowIntensity">
+                                    <option value="" disabled selected>Select flow intensity...</option>
+                                    <option value="spotting">Spotting</option>
+                                    <option value="light">Light</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="heavy">Heavy</option>
+                                    <option value="very_heavy">Very Heavy</option>
+                                </select>
+                                <div class="select-arrow"></div>
+                            </div>
+                        </div>
+                        <button onclick="logPeriodData()" class="submit-period">
+                            <i class="fas fa-plus"></i> Log Period
+                        </button>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Cycle Information</h3>
+                    <div id="cyclePredictions" class="cycle-info">
+                        <div class="next-period">
+                            <h4>Next Period Expected:</h4>
+                            <p id="nextPeriodDate">Loading...</p>
+                        </div>
+                        <div class="cycle-stats">
+                            <h4>Your Cycle Stats:</h4>
+                            <ul id="cycleStats"></ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Period History</h3>
+                    <div class="period-history">
+                        <ul id="periodHistory" class="history-list"></ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3><i class="fas fa-heart"></i> Suggested Remedies</h3>
+                    <div id="remediesSuggestions" class="remedies-content">
+                        <div class="remedies-placeholder">
+                            <p>Select symptoms to see personalized remedies and self-care tips.</p>
+                        </div>
+                        <div class="remedies-list" style="display: none;">
+                            <div class="remedy-category">
+                                <h4>Quick Relief Tips</h4>
+                                <ul id="quickReliefTips"></ul>
+                            </div>
+                            <div class="remedy-category">
+                                <h4>Natural Remedies</h4>
+                                <ul id="naturalRemedies"></ul>
+                            </div>
+                            <div class="remedy-category">
+                                <h4>Lifestyle Adjustments</h4>
+                                <ul id="lifestyleAdjustments"></ul>
+                            </div>
+                            <div class="wellness-note">
+                                <p><i class="fas fa-info-circle"></i> Remember: These are general suggestions. If symptoms are severe or persistent, please consult a healthcare provider.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Todo List Section -->
+        <section id="todo" class="section">
+            <h2>Todo List</h2>
+            <div class="card">
+                <div class="todo-container">
+                    <div class="todo-input">
+                        <input type="text" id="todoInput" placeholder="Add a new task...">
+                        <button onclick="addTodo()" class="add-todo-btn">
+                            <i class="fas fa-plus"></i> Add Task
+                        </button>
+                    </div>
+                    <ul id="todoList" class="todo-list"></ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/main.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/tracking.js"></script>
+</body>
+</html> 
